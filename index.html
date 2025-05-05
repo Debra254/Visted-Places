@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Objects Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .app {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            flex: 1;
+            min-width: 300px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            color: black;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Objects Practice</h1>
+    
+    <div class="tab">
+        <button class="tablinks active" onclick="openApp(event, 'addressBook')">Address Book</button>
+        <button class="tablinks" onclick="openApp(event, 'places')">Places You've Been</button>
+        <button class="tablinks" onclick="openApp(event, 'todo')">To Do List</button>
+    </div>
+
+    <!-- Address Book App -->
+    <div id="addressBook" class="tabcontent" style="display: block;">
+        <h2>Address Book</h2>
+        <div>
+            <h3>Add New Contact</h3>
+            <input type="text" id="firstName" placeholder="First Name">
+            <input type="text" id="lastName" placeholder="Last Name">
+            <input type="text" id="phoneNumber" placeholder="Phone Number">
+            <button onclick="addContact()">Add Contact</button>
+        </div>
+        <div>
+            <h3>Add Address to Contact</h3>
+            <select id="contactSelect"></select>
+            <input type="text" id="street" placeholder="Street">
+            <input type="text" id="city" placeholder="City">
+            <input type="text" id="state" placeholder="State">
+            <select id="addressType">
+                <option value="home">Home</option>
+                <option value="work">Work</option>
+                <option value="other">Other</option>
+            </select>
+            <button onclick="addAddress()">Add Address</button>
+        </div>
+        <div>
+            <h3>Contacts</h3>
+            <ul id="contactList"></ul>
+        </div>
+    </div>
+
+    <!-- Places You've Been App -->
+    <div id="places" class="tabcontent">
+        <h2>Places You've Been</h2>
+        <div>
+            <h3>Add New Destination</h3>
+            <input type="text" id="location" placeholder="Location">
+            <input type="text" id="landmarks" placeholder="Landmarks (comma separated)">
+            <input type="text" id="timeOfYear" placeholder="Time of Year">
+            <input type="text" id="notes" placeholder="Notes">
+            <button onclick="addDestination()">Add Destination</button>
+        </div>
+        <div>
+            <h3>Your Destinations</h3>
+            <ul id="destinationList"></ul>
+        </div>
+        <div id="destinationDetails" style="display: none;">
+            <h3>Destination Details</h3>
+            <div id="detailsContent"></div>
+            <button onclick="hideDetails()">Close</button>
+        </div>
+    </div>
+
+    <!-- To Do List App -->
+    <div id="todo" class="tabcontent">
+        <h2>To Do List</h2>
+        <div>
+            <h3>Add New Task</h3>
+            <input type="text" id="taskDescription" placeholder="Task Description">
+            <input type="date" id="dueDate">
+            <select id="priority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+            </select>
+            <button onclick="addTask()">Add Task</button>
+        </div>
+        <div>
+            <h3>Your Tasks</h3>
+            <ul id="taskList"></ul>
+        </div>
+        <div>
+            <button onclick="clearCompleted()">Clear Completed Tasks</button>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        function openApp(evt, appName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(appName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Address Book Application
+        function Contact(firstName, lastName, phoneNumber) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.phoneNumber = phoneNumber;
+            this.addresses = [];
+        }
+
+        Contact.prototype.fullName = function() {
+            return this.firstName + " " + this.lastName;
+        };
+
+        function Address(street, city, state, type) {
+            this.street = street;
+            this.city = city;
+            this.state = state;
+            this.type = type;
+        }
+
+        Address.prototype.fullAddress = function() {
+            return this.type + ": " + this.street + ", " + this.city + ", " + this.state;
+        };
+
+        const addressBook = {
+            contacts: [],
+            currentId: 0,
+
+            addContact: function(firstName, lastName, phoneNumber) {
+                const contact = new Contact(firstName, lastName, phoneNumber);
+                contact.id = ++this.currentId;
+                this.contacts.push(contact);
+                this.updateContactSelect();
+                this.displayContacts();
+            },
+
+            addAddress: function(contactId, street, city, state, type) {
+                const contact = this.contacts.find(c => c.id == contactId);
+                if (contact) {
+                    const address = new Address(street, city, state, type);
+                    contact.addresses.push(address);
+                    this.displayContacts();
+                }
+            },
+
+            updateContactSelect: function() {
+                const select = document.getElementById('contactSelect');
+                select.innerHTML = '';
+                this.contacts.forEach(contact => {
+                    const option = document.createElement('option');
+                    option.value = contact.id;
+                    option.textContent = contact.fullName();
+                    select.appendChild(option);
+                });
+            },
+
+            displayContacts: function() {
+                const list = document.getElementById('contactList');
+                list.innerHTML = '';
+                this.contacts.forEach(contact => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${contact.fullName()}</strong> - ${contact.phoneNumber}`;
+                    
+                    if (contact.addresses.length > 0) {
+                        const ul = document.createElement('ul');
+                        contact.addresses.forEach(address => {
+                            const addrLi = document.createElement('li');
+                            addrLi.textContent = address.fullAddress();
+                            ul.appendChild(addrLi);
+                        });
+                        li.appendChild(ul);
+                    }
+                    
+                    list.appendChild(li);
+                });
+            }
+        };
+
+        function addContact() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            
+            if (firstName && lastName && phoneNumber) {
+                addressBook.addContact(firstName, lastName, phoneNumber);
+                document.getElementById('firstName').value = '';
+                document.getElementById('lastName').value = '';
+                document.getElementById('phoneNumber').value = '';
+            } else {
+                alert('Please fill in all contact fields');
+            }
+        }
+
+        function addAddress() {
+            const contactId = document.getElementById('contactSelect').value;
+            const street = document.getElementById('street').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const type = document.getElementById('addressType').value;
+            
+            if (contactId && street && city && state) {
+                addressBook.addAddress(contactId, street, city, state, type);
+                document.getElementById('street').value = '';
+                document.getElementById('city').value = '';
+                document.getElementById('state').value = '';
+            } else {
+                alert('Please select a contact and fill in all address fields');
+            }
+        }
+
+        // Places You've Been Application
+        function Destination(location, landmarks, timeOfYear, notes) {
+            this.location = location;
+            this.landmarks = landmarks.split(',').map(item => item.trim());
+            this.timeOfYear = timeOfYear;
+            this.notes = notes;
+        }
+
+        Destination.prototype.details = function() {
+            return `
+                <p><strong>Location:</strong> ${this.location}</p>
+                <p><strong>Landmarks:</strong> ${this.landmarks.join(', ')}</p>
+                <p><strong>Time of Year:</strong> ${this.timeOfYear}</p>
+                <p><strong>Notes:</strong> ${this.notes}</p>
+            `;
+        };
+
+        const travelJournal = {
+            destinations: [],
+
+            addDestination: function(location, landmarks, timeOfYear, notes) {
+                const destination = new Destination(location, landmarks, timeOfYear, notes);
+                this.destinations.push(destination);
+                this.displayDestinations();
+            },
+
+            displayDestinations: function() {
+                const list = document.getElementById('destinationList');
+                list.innerHTML = '';
+                this.destinations.forEach((destination, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = destination.location;
+                    li.style.cursor = 'pointer';
+                    li.onclick = () => this.showDestinationDetails(index);
+                    list.appendChild(li);
+                });
+            },
+
+            showDestinationDetails: function(index) {
+                const destination = this.destinations[index];
+                document.getElementById('detailsContent').innerHTML = destination.details();
+                document.getElementById('destinationDetails').style.display = 'block';
+            }
+        };
+
+        function addDestination() {
+            const location = document.getElementById('location').value;
+            const landmarks = document.getElementById('landmarks').value;
+            const timeOfYear = document.getElementById('timeOfYear').value;
+            const notes = document.getElementById('notes').value;
+            
+            if (location && landmarks) {
+                travelJournal.addDestination(location, landmarks, timeOfYear, notes);
+                document.getElementById('location').value = '';
+                document.getElementById('landmarks').value = '';
+                document.getElementById('timeOfYear').value = '';
+                document.getElementById('notes').value = '';
+            } else {
+                alert('Please at least fill in Location and Landmarks');
+            }
+        }
+
+        function hideDetails() {
+            document.getElementById('destinationDetails').style.display = 'none';
+        }
+
+        // To Do List Application
+        function Task(description, dueDate, priority) {
+            this.description = description;
+            this.dueDate = dueDate;
+            this.priority = priority;
+            this.completed = false;
+        }
+
+        const todoList = {
+            tasks: [],
+
+            addTask: function(description, dueDate, priority) {
+                const task = new Task(description, dueDate, priority);
+                this.tasks.push(task);
+                this.displayTasks();
+            },
+
+            toggleComplete: function(index) {
+                this.tasks[index].completed = !this.tasks[index].completed;
+                this.displayTasks();
+            },
+
+            removeTask: function(index) {
+                this.tasks.splice(index, 1);
+                this.displayTasks();
+            },
+
+            clearCompleted: function() {
+                this.tasks = this.tasks.filter(task => !task.completed);
+                this.displayTasks();
+            },
+
+            displayTasks: function() {
+                const list = document.getElementById('taskList');
+                list.innerHTML = '';
+                this.tasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.className = task.completed ? 'completed' : '';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = task.completed;
+                    checkbox.onchange = () => this.toggleComplete(index);
+                    
+                    const span = document.createElement('span');
+                    span.textContent = task.description;
+                    if (task.dueDate) {
+                        span.textContent += ` (Due: ${task.dueDate})`;
+                    }
+                    span.textContent += ` [${task.priority}]`;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = () => this.removeTask(index);
+                    
+                    li.appendChild(checkbox);
+                    li.appendChild(span);
+                    li.appendChild(deleteBtn);
+                    list.appendChild(li);
+                });
+            }
+        };
+
+        function addTask() {
+            const description = document.getElementById('taskDescription').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const priority = document.getElementById('priority').value;
+            
+            if (description) {
+                todoList.addTask(description, dueDate, priority);
+                document.getElementById('taskDescription').value = '';
+                document.getElementById('dueDate').value = '';
+            } else {
+                alert('Please enter a task description');
+            }
+        }
+
+        function clearCompleted() {
+            todoList.clearCompleted();
+        }
+
+        // Initialize apps
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add some sample data
+            addressBook.addContact('John', 'Doe', '555-1234');
+            addressBook.addContact('Jane', 'Smith', '555-5678');
+            addressBook.addAddress(1, '123 Main St', 'Portland', 'OR', 'home');
+            
+            travelJournal.addDestination('Paris', 'Eiffel Tower, Louvre', 'Spring', 'Beautiful city!');
+            travelJournal.addDestination('Tokyo', 'Shibuya Crossing, Meiji Shrine', 'Fall', 'Amazing food');
+            
+            todoList.addTask('Buy groceries', '2023-06-15', 'high');
+            todoList.addTask('Finish project', '2023-06-20', 'medium');
+        });
+    </script>
+</body>
+</html>
